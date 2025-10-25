@@ -1,0 +1,76 @@
+# ======================================
+# SAFETIFY PROJECT
+# ======================================
+
+# -----------------------
+# 📱 Flutter / Dart / Pub
+# -----------------------
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+coverage/
+flutter_*.png
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# Dependency lock file (optional)
+# pubspec.lock
+
+# -----------------------
+# 🧱 Android
+# -----------------------
+.gradle/
+local.properties
+**/GeneratedPluginRegistrant.java
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# -----------------------
+# 🍎 iOS
+# -----------------------
+Pods/
+**/*.xcuserstate
+**/DerivedData/
+ios/Flutter/.last_build_id
+
+# -----------------------
+# 💻 Web / macOS / Linux / Windows
+# -----------------------
+linux/build/
+macos/Flutter/ephemeral/
+web/.dart_tool/
+web/build/
+windows/Flutter/ephemeral/
+
+# -----------------------
+# 🧩 IDEs & Editors
+# -----------------------
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.atom/
+.history/
+.svn/
+
+# -----------------------
+# ⚙️ Miscellaneous
+# -----------------------
+*.log
+*.class
+*.pyc
+*.swp
+.DS_Store
+Thumbs.db
+.build/
+.buildlog/
+.swiftpm/
+migrate_working_dir/
+app.*.symbols
+app.*.map.json
