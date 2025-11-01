@@ -15,7 +15,7 @@ class _StartupPageState extends State<StartupPage> {
     super.initState();
 
     // Timer to navigate
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacementNamed(context, '/welcome');
     });
   }
@@ -28,7 +28,7 @@ class _StartupPageState extends State<StartupPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shield_rounded, size: 80, color: Colors.white,),
+            Icon(Icons.security, size: 80, color: Colors.white,),
             // Safetify Logo
             // Image.asset(
             //   'assets/images/analytics.png',
@@ -40,7 +40,7 @@ class _StartupPageState extends State<StartupPage> {
               'Safetify',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
               ),

@@ -121,12 +121,12 @@ class _WelcomePageState extends State<WelcomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: SizedBox(
                 width: double.infinity,
-                height: 56, // fixed height to match typical login button size
+                height: 50, // fixed height to match typical login button size
                 child: ElevatedButton(
                   onPressed: _onPrimaryButtonPressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.safetyBlue,
-                    minimumSize: const Size.fromHeight(56),
+                    minimumSize: const Size.fromHeight(50),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),

@@ -11,7 +11,7 @@ class EmergencyContactsPage extends StatelessWidget {
       'name': 'Police Emergency',
       'phone': '112',
       'icon': Icons.local_police_rounded,
-      'color': AppColors.safetyBlue
+      'color': AppColors.darkCharcoal
     },
     {
       'name': 'Fire Service',
@@ -32,16 +32,16 @@ class EmergencyContactsPage extends StatelessWidget {
       'color': Colors.orange
     },
     {
-      'name': 'REMASAB',
-      'phone': '08003330600',
-      'icon': Icons.delete_rounded,
-      'color': Colors.amber
-    },
-    {
       'name': 'NEMA (Disaster Response)',
       'phone': '08003330600',
       'icon': Icons.warning_amber_rounded,
-      'color': AppColors.darkCharcoal
+      'color': AppColors.safetyBlue
+    },
+    {
+      'name': 'REMASAB',
+      'phone': '08003330600',
+      'icon': Icons.delete_rounded,
+      'color': Color.fromARGB(255, 223, 167, 0)
     },
   ];
 
@@ -73,7 +73,7 @@ class EmergencyContactsPage extends StatelessWidget {
             child: ListTile(
               leading: CircleAvatar(
                 radius: 24,
-                backgroundColor: c['color'].withOpacity(0.1),
+                backgroundColor: c['color'].withOpacity(0.2),
                 child: Icon(c['icon'], color: c['color']),
               ),
               title: Text(

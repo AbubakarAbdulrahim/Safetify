@@ -22,11 +22,13 @@ class _ReportPageState extends State<ReportPage> {
   bool _loading = false;
 
   final _categories = [
-    {'label': 'Insecurity', 'icon': Icons.shield_rounded},
+    {'label': 'Insecurity', 'icon': Icons.security_rounded},
     {'label': 'Fire', 'icon': Icons.local_fire_department_rounded},
     {'label': 'Traffic', 'icon': Icons.directions_car_rounded},
     {'label': 'Waste', 'icon': Icons.delete_rounded},
     {'label': 'Flood', 'icon': Icons.water_rounded},
+    {'label': 'Blockage', 'icon': Icons.block_rounded},
+    {'label': 'Other', 'icon': Icons.report_problem_rounded},
   ];
 
   Future _takePhoto() async {
@@ -116,16 +118,16 @@ class _ReportPageState extends State<ReportPage> {
                 onTap: _takePhoto,
                 child: _photo == null
                     ? DottedAddPhoto()
-                    : ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_photo!, height: 170, fit: BoxFit.cover)),
+                    : ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_photo!, height: 190, fit: BoxFit.cover)),
               ),
               SizedBox(height: 12),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.location_on_rounded, color: AppColors.safetyBlue),
-                title: Text(_lat == null ? 'Current Location' : '$_lat, $_lon', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold,),),
+                title: Text(_lat == null ? 'Current Location' : '$_lat, $_lon', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400,),),
                 subtitle: Text(_lat == null ? 'Tap to detect your current location' : 'Auto-detected', style: GoogleFonts.inter(fontSize: 14,),),
                 trailing: ElevatedButton(onPressed: _getLocation,
-                child: Icon(Icons.my_location_rounded, color: Colors.white,),),
+                child: Icon(Icons.my_location_rounded, color: Colors.white, size: 22,),),
               ),
               SizedBox(height: 12),
               TextField(controller: _descController, minLines: 3, maxLines: 6, decoration: InputDecoration(hintText: 'Describe the incident (optional)',), style: GoogleFonts.inter(fontSize: 16, ),),
@@ -136,7 +138,7 @@ class _ReportPageState extends State<ReportPage> {
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.safetyBlue,
-                        padding: EdgeInsets.symmetric(vertical: 24),
+                        padding: EdgeInsets.symmetric(vertical: 22),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(

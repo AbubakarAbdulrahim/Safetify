@@ -15,6 +15,8 @@ import 'Pages/emergency_contacts.dart';
 import 'Pages/community_updates.dart';
 import 'Pages/startup.dart';
 import 'pages/map.dart';
+import 'pages/alerts_page.dart';
+import 'pages/incident_histoty.dart';
 
 void main() {
   runApp(SafetifyApp());
@@ -50,6 +52,8 @@ class SafetifyApp extends StatelessWidget {
         '/emergency_contacts': (_) => EmergencyContactsPage(),
         '/community_updates': (_) => CommunityUpdatesPage(),
         '/startup': (_) => StartupPage(),
+        '/alerts': (_) => AlertsPage(),
+        '/history': (_) => IncidentsHistoryPage(),
       },
     );
   }

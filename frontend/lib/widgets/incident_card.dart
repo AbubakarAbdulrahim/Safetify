@@ -10,14 +10,14 @@ class IncidentCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const IncidentCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.imageAsset = 'assets/images/fire.jpg',
     this.badge = 'Unverified',
     this.badgeColor = AppColors.amber,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

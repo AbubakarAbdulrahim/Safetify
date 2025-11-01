@@ -84,11 +84,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ? const Center(child: CircularProgressIndicator())
                     : SizedBox(
                       width: double.infinity,
+                      height: 50,
                       child: ElevatedButton(
                       onPressed: _sendResetLink,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.safetyBlue,
-                        padding: EdgeInsets.symmetric(vertical: 24),
+                        padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(

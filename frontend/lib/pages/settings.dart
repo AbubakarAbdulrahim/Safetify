@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
 
 
   @override
@@ -73,11 +75,12 @@ void _save() {
                 ? const Center(child: CircularProgressIndicator())
                   : SizedBox(
                     width: double.infinity,
+                    height: 50,
                     child: ElevatedButton(
                     onPressed: _save,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.safetyBlue,
-                      padding: EdgeInsets.symmetric(vertical: 24),
+                      padding: EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(

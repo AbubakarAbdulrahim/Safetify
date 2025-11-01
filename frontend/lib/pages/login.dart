@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 60),
               Center(
-                child: Icon(Icons.shield_rounded, color: AppColors.safetyBlue, size: 60),
+                child: Icon(Icons.security_rounded, color: AppColors.safetyBlue, size: 60),
               ),
               const SizedBox(height: 16),
               Center(
@@ -109,6 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                   ? const Center(child: CircularProgressIndicator())
                     : SizedBox(
                       width: double.infinity,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/');
@@ -116,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                       // onPressed: _login, for my api auth login
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.safetyBlue,
-                        padding: EdgeInsets.symmetric(vertical: 24),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(

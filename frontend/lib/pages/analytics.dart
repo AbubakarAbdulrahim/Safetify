@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:safetify/widgets/incident_card.dart';
 import '../constants.dart';
 //import '../widgets/incident_card.dart';
 
@@ -25,18 +26,30 @@ class AnalyticsPage extends StatelessWidget {
             SizedBox(height: 18),
             Align(alignment: Alignment.centerLeft, child: Text('Incidents', style: TextStyle(fontWeight: FontWeight.w700))),
             SizedBox(height: 8),
-            // Simple line-like representation using Container (replace with charts lib)
+            // Simple bar chart representation using Row and Containers
             Container(
               height: 120,
-              decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(12)),
-              child: Center(child: Image.asset('images/analytics.png')),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _barChartBar('Incidents', incidents, Colors.orange),
+                _barChartBar('Alerts', alerts, Colors.red),
+                _barChartBar('Reports', reports, Colors.blue),
+              ],
+              ),
             ),
-            // SizedBox(height: 12),
-            // Align(alignment: Alignment.centerLeft, child: Text('Recent Reports', style: TextStyle(fontWeight: FontWeight.w700))),
-            // SizedBox(height: 10),
-            // IncidentCard(title: 'Fire: Sabon Gari', subtitle: '2 hrs ago', imageAsset: 'assets/images/fire.jpg', badge: 'Unverified', badgeColor: AppColors.alertRed),
-            // SizedBox(height: 8),
-            // IncidentCard(title: 'Flood: Rijiyar Zaki', subtitle: 'Yesterday', imageAsset: 'assets/images/flood.jpg', badge: 'Verified', badgeColor: AppColors.successGreen),
+            SizedBox(height: 12),
+            Align(alignment: Alignment.centerLeft, child: Text('Recent Reports', style: TextStyle(fontWeight: FontWeight.w700))),
+            SizedBox(height: 10),
+            IncidentCard(title: 'Fire: Sabon Gari', subtitle: '2 hrs ago', imageAsset: 'assets/images/fire.jpg', badge: 'Unverified', badgeColor: AppColors.alertRed),
+            SizedBox(height: 8),
+            IncidentCard(title: 'Flood: Rijiyar Zaki', subtitle: 'Yesterday', imageAsset: 'assets/images/flood.jpg', badge: 'Verified', badgeColor: AppColors.successGreen),
           ]),
         ),
       ),
@@ -50,6 +63,37 @@ class AnalyticsPage extends StatelessWidget {
         SizedBox(height: 6),
         Text(label, style: TextStyle(color: Colors.grey[700])),
       ]),
+    );
+  }
+
+  Widget _barChartBar(String label, int value, Color color) {
+    // determine the maximum value among the stats to scale bars proportionally
+    final int maxVal = [incidents, alerts, reports].reduce((a, b) => a > b ? a : b);
+    final double heightFactor = maxVal > 0 ? value / maxVal : 0.0;
+    final double barHeight = heightFactor * 80 + 8; // base minimum height
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          width: 20,
+          height: barHeight,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        SizedBox(height: 6),
+        SizedBox(
+          width: 48,
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 12),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

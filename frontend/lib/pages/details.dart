@@ -166,7 +166,7 @@ Stay safe and report updates on Safetify!
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
                       ),
                       onPressed: isResolved ? null : markAsResolved,
                       icon: const Icon(Icons.check_circle_outline, color: Colors.white),
@@ -184,7 +184,7 @@ Stay safe and report updates on Safetify!
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
                       ),
                       onPressed: shareIncident,
                       icon: const Icon(Icons.share_outlined, color: AppColors.safetyBlue),

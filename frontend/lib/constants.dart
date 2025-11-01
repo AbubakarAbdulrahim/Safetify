@@ -35,14 +35,14 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.safetyBlue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: EdgeInsets.symmetric(vertical: 24),
+          padding: EdgeInsets.symmetric(vertical: 22),
           textStyle: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.subtle,
-        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       ),
     );

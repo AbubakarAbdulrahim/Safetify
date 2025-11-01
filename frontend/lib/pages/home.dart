@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _index = 0;
+  final int _index = 0;
 
   void _onNavTap(int index) {
     if (index == 0) return; //home by default
@@ -26,14 +26,14 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Row(children: [
-          Icon(Icons.shield_rounded, color: AppColors.darkCharcoal),
+          Icon(Icons.security_outlined, color: AppColors.darkCharcoal),
           SizedBox(width: 5),
           Text('Safetify', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
         ]),
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(onPressed: () { Navigator.pushNamed(context, '/details');},
+          IconButton(onPressed: () { Navigator.pushNamed(context, '/alerts');},
         icon: Stack(children: [
             Icon(Icons.notifications_rounded, color: AppColors.darkCharcoal),
             Positioned(right: 0, child: CircleAvatar(radius: 4, backgroundColor: AppColors.alertRed))
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
               childAspectRatio: 1.8,
               children: [
                 _QuickCard(icon: Icons.note_add_rounded, label: 'Report\nIncident', onTap: () => Navigator.pushNamed(context, '/report')),
-                _QuickCard(icon: Icons.place_rounded, label: 'View\nIncidents', onTap: () => Navigator.pushNamed(context, '/map')),
+                _QuickCard(icon: Icons.history, label: 'Incidents\nHistory', onTap: () => Navigator.pushNamed(context, '/history')),
                 _QuickCard(icon: Icons.call_rounded, label: 'Emergency\nContacts', onTap: () => Navigator.pushNamed(context, '/emergency_contacts')),
                 _QuickCard(icon: Icons.campaign_rounded, label: 'Community\nUpdates', onTap: () => Navigator.pushNamed(context, '/community_updates')),
               ],
