@@ -121,14 +121,16 @@ class _MapPageState extends State<MapPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IncidentCard(title: marker.title, subtitle: marker.subtitle),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, '/analytics'),
+              onPressed: () => Navigator.pushNamed(context, '/details'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.card,
-                foregroundColor: AppColors.safetyBlue,
-              ),
-              child: const Text('View Details'),
+                backgroundColor: AppColors.safetyBlue,
+                maximumSize: const Size.fromHeight(50),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              child: const Text('View Details', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),),
             ),
           ],
         ),
@@ -163,8 +165,8 @@ class _MapPageState extends State<MapPage> {
                 markers: _markers.map((m) {
                   return Marker(
                     point: m.location,
-                    width: 40,
-                    height: 40,
+                    width: 100,
+                    height: 100,
                     child: GestureDetector(
                       onTap: () => _onMarkerTap(m),
                       child: Column(

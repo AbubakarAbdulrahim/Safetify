@@ -64,10 +64,11 @@ flutter:
     - assets/images/flood.jpg
     - assets/images/traffic.jpg
     - assets/images/profile.jpg
-    - assets/images/a.png
-    - assets/images/b.png
-    - assets/images/c.png
-    - assets/images/d.png
+    - assets/images/5.png
+    - assets/images/6.png
+    - assets/images/7.png
+    - assets/images/8.png
+    - assets/images/9.png
 
   #   - assets/images/incident_placeholder.jpg
   # An image asset can refer to one or more resolution-specific "variants", see

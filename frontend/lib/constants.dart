@@ -35,7 +35,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.safetyBlue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: EdgeInsets.symmetric(vertical: 22),
+          padding: EdgeInsets.symmetric(vertical: 14),
           textStyle: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),

@@ -124,7 +124,7 @@ class _ReportPageState extends State<ReportPage> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.location_on_rounded, color: AppColors.safetyBlue),
-                title: Text(_lat == null ? 'Current Location' : '$_lat, $_lon', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400,),),
+                title: Text(_lat == null ? 'Current Location' : '$_lat, $_lon', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500,),),
                 subtitle: Text(_lat == null ? 'Tap to detect your current location' : 'Auto-detected', style: GoogleFonts.inter(fontSize: 14,),),
                 trailing: ElevatedButton(onPressed: _getLocation,
                 child: Icon(Icons.my_location_rounded, color: Colors.white, size: 22,),),
@@ -138,7 +138,7 @@ class _ReportPageState extends State<ReportPage> {
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.safetyBlue,
-                        padding: EdgeInsets.symmetric(vertical: 22),
+                        padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(

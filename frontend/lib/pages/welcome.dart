@@ -17,17 +17,17 @@ class _WelcomePageState extends State<WelcomePage> {
     {
       'title': 'Report incidents easily',
       'subtitle': 'Capture and submit incidents in real-time to keep your community informed.',
-      'image': 'assets/images/a.png',
+      'image': 'assets/images/7.png',
     },
     {
       'title': 'Stay alert & connected',
       'subtitle': 'Get real-time updates and alerts about nearby safety issues.',
-      'image': 'assets/images/b.png',
+      'image': 'assets/images/9.png',
     },
     {
       'title': 'Together, we stay safe',
       'subtitle': 'Join others in building a safer and more responsive city.',
-      'image': 'assets/images/c.png',
+      'image': 'assets/images/8.png',
     },
   ];
 

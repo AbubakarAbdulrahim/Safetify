@@ -8,7 +8,7 @@ class AnalyticsPage extends StatelessWidget {
   // Dummy stats for UI demonstration. Replace with API data.
   final int incidents = 5;
   final int alerts = 18;
-  final int reports = 23;
+  final int reports = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class AnalyticsPage extends StatelessWidget {
             SizedBox(height: 8),
             // Simple bar chart representation using Row and Containers
             Container(
-              height: 120,
+              height: 200,
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
               color: AppColors.card,
@@ -44,7 +44,7 @@ class AnalyticsPage extends StatelessWidget {
               ],
               ),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 20),
             Align(alignment: Alignment.centerLeft, child: Text('Recent Reports', style: TextStyle(fontWeight: FontWeight.w700))),
             SizedBox(height: 10),
             IncidentCard(title: 'Fire: Sabon Gari', subtitle: '2 hrs ago', imageAsset: 'assets/images/fire.jpg', badge: 'Unverified', badgeColor: AppColors.alertRed),

@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 30),
               Center(
                 child: Icon(Icons.security_rounded, color: AppColors.safetyBlue, size: 60),
               ),
@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: 'Email address',
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                    contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: TextField(
@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: 'Password',
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                    contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
