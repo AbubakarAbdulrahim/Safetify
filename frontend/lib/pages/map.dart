@@ -108,7 +108,7 @@ class _MapPageState extends State<MapPage> {
       title: 'Flooding reported',
       subtitle: 'Unverified • 45 mins ago',
       location: LatLng(11.015, 8.505),
-      color: Colors.orange,
+      color: AppColors.alertRed,
     ),
   ];
 
@@ -127,7 +127,7 @@ class _MapPageState extends State<MapPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.safetyBlue,
                 maximumSize: const Size.fromHeight(50),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 24),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               child: const Text('View Details', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),),
