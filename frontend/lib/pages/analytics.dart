@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:safetify/widgets/incident_card.dart';
 import '../constants.dart';
-//import '../widgets/incident_card.dart';
+import '../widgets/incident_card.dart';
 
 class AnalyticsPage extends StatelessWidget {
   const AnalyticsPage({super.key});
@@ -44,12 +43,6 @@ class AnalyticsPage extends StatelessWidget {
               ],
               ),
             ),
-            SizedBox(height: 20),
-            Align(alignment: Alignment.centerLeft, child: Text('Recent Reports', style: TextStyle(fontWeight: FontWeight.w700))),
-            SizedBox(height: 10),
-            IncidentCard(title: 'Fire: Sabon Gari', subtitle: '2 hrs ago', imageAsset: 'assets/images/fire.jpg', badge: 'Unverified', badgeColor: AppColors.alertRed),
-            SizedBox(height: 8),
-            IncidentCard(title: 'Flood: Rijiyar Zaki', subtitle: 'Yesterday', imageAsset: 'assets/images/flood.jpg', badge: 'Verified', badgeColor: AppColors.successGreen),
           ]),
         ),
       ),

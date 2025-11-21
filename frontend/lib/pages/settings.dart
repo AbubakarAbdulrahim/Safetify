@@ -16,9 +16,11 @@ class _SettingsPageState extends State<SettingsPage> {
   final bool _loading = false;
   String _theme = 'Light';
 
-void _save() {
-    setState(() {
-    });
+
+
+  Future<void> _save() async {
+    setState(() {});
+    await Future.delayed(Duration(seconds: 1));
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

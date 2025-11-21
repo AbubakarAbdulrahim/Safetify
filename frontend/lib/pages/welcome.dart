@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -32,10 +33,18 @@ class _WelcomePageState extends State<WelcomePage> {
   ];
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(context, '/home');
+        });
+      }
+    });
   }
+  
 
   void _onPrimaryButtonPressed() {
     if (_pageIndex == _pages.length - 1) {
@@ -49,7 +58,6 @@ class _WelcomePageState extends State<WelcomePage> {
           curve: Curves.easeInOut,
         );
       } else {
-        // Fallback: update index immediately if controller not available
         setState(() => _pageIndex = nextPage);
       }
     }
@@ -121,7 +129,7 @@ class _WelcomePageState extends State<WelcomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: SizedBox(
                 width: double.infinity,
-                height: 50, // fixed height to match typical login button size
+                height: 50, 
                 child: ElevatedButton(
                   onPressed: _onPrimaryButtonPressed,
                   style: ElevatedButton.styleFrom(

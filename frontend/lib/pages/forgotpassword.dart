@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
+import 'package:safetify/services/auth_service.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -11,18 +12,40 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController emailCtrl = TextEditingController();
   bool _loading = false;
-  // bool _sent = false;
 
-  Future<void> _sendResetLink() async {
+  final AuthService authService = AuthService();
+
+  Future _sendResetLink() async {
     setState(() => _loading = true);
-    await Future.delayed(const Duration(seconds: 2)); // simulate backend delay
-    setState(() {
-      _loading = false;
-      // _sent = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password reset link sent to your email')),
-    );
+    final email = emailCtrl.text.trim();
+
+    try {
+      await authService.sendPasswordResetEmail(email);
+      setState(() => _loading = false);
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Reset Link Sent'),
+          content: const Text('A password reset link has been sent to your email address.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+        ),
+      );
+    }
   }
 
   @override
@@ -61,7 +84,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 width: double.infinity,
                 child: TextField(
                   controller: emailCtrl,
-                  obscureText: true,
+                  obscureText: false,
                   decoration: InputDecoration(
                     labelText: 'Email address',
                     filled: true,
@@ -80,25 +103,38 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
               ),
               const SizedBox(height: 30),
-              _loading
-                  ? const Center(child: CircularProgressIndicator())
-                    : SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                      onPressed: _sendResetLink,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.safetyBlue,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(
-                        "Send Reset Link",
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
-                      ),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _loading ? null : _sendResetLink,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.safetyBlue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-              const SizedBox(height: 20),
+                    disabledBackgroundColor: AppColors.safetyBlue.withOpacity(0.8),
+                  ),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Send Reset Link",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 25),
               TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/login');

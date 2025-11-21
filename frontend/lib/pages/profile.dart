@@ -1,10 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../widgets/bottom_nav.dart';
+import 'package:safetify/services/auth_service.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  ProfilePage({super.key});
   
+  final AuthService authService = AuthService();
+
+  final User? user = AuthService().currentUser;
+  
+  BuildContext get context => throw UnimplementedError();
+
+  Future<void> logout() async {
+    await authService.logout();
+    if (!context.mounted) return;
+    Navigator.popAndPushNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +46,22 @@ class ProfilePage extends StatelessWidget {
               title: "Logout",
               subtitle: "Sign out from your account",
               onTap: () {
-                Navigator.popAndPushNamed(context, '/login');
+                logout();
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Logged Out'),
+                    content: const Text('You have been logged out successfully.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.popAndPushNamed(context, '/login'); // Close dialog
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
               },
               isDestructive: true,
             ),
@@ -41,7 +70,7 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNav(currentIndex: 3, onTap: (i) {
-        if (i == 0) Navigator.pushReplacementNamed(context, '/');
+        if (i == 0) Navigator.pushReplacementNamed(context, '/home');
         if (i == 1) Navigator.pushNamed(context, '/map');
         if (i == 2) Navigator.pushNamed(context, '/analytics');
         if (i == 3) Navigator.pushReplacementNamed(context, '/profile');

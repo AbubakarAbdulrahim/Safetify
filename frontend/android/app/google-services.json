@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1097985768380",
+    "project_id": "safetify-61721",
+    "storage_bucket": "safetify-61721.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1097985768380:android:e1f6241746a88e449049b9",
+        "android_client_info": {
+          "package_name": "com.example.safetify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUeIzllAdqOC8P9RjkE3hKcdQgQz3xT60"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

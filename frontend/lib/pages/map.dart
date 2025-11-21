@@ -1,70 +1,157 @@
+// import 'dart:async';
 // import 'package:flutter/material.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import '../constants.dart';
-// import '../widgets/incident_card.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:location/location.dart';
+// import 'package:safetify/constants.dart';
+// import 'package:safetify/models/incidents.dart';
 
 // class MapPage extends StatefulWidget {
 //   const MapPage({super.key});
 
 //   @override
-//   _MapPageState createState() => _MapPageState();
+//   State<MapPage> createState() => _MapPageState();
 // }
 
 // class _MapPageState extends State<MapPage> {
-//   GoogleMapController? _controller;
-//   final CameraPosition _initial = CameraPosition(target: LatLng(11.0000, 8.5167), zoom: 12); // Kano center example
-//   final Set<Marker> _markers = {};
+//   final Completer<GoogleMapController> _controller = Completer();
+
+//   Location location = Location();
+//   LatLng? currentUserPosition;
+
+//   Set<Marker> _markers = {};
 
 //   @override
 //   void initState() {
 //     super.initState();
-//     // Add sample markers (in production populate from API)
-//     _markers.addAll([
-//       Marker(markerId: MarkerId('fire1'), position: LatLng(11.008, 8.510), icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)),
-//       Marker(markerId: MarkerId('insec1'), position: LatLng(11.012, 8.520), icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)),
-//       Marker(markerId: MarkerId('flood1'), position: LatLng(11.015, 8.505), icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange)),
-//     ]);
+//     _enableLocation();
+//     _listenForLiveUserLocation();
+//     _listenForIncidents();
 //   }
 
-//   void _onMarkerTap(String id) {
-//     // open bottom sheet for details
-//     showModalBottomSheet(context: context, builder: (_) => Container(
-//       padding: EdgeInsets.all(16),
-//       child: Column(mainAxisSize: MainAxisSize.min, children: [
-//         IncidentCard(title: 'Fire outbreak near Sabon Gari', subtitle: 'Unverified • 15 mins ago'),
-//         SizedBox(height: 10),
-//         ElevatedButton(onPressed: () => Navigator.pushNamed(context, '/analytics'), child: Text('View Details'))
-//       ]),
-//     ));
+//   // ================================
+//   // 1. ENABLE LOCATION PERMISSIONS
+//   // ================================
+//   Future<void> _enableLocation() async {
+//     bool serviceEnabled = await location.serviceEnabled();
+//     if (!serviceEnabled) {
+//       serviceEnabled = await location.requestService();
+//       if (!serviceEnabled) return;
+//     }
+
+//     PermissionStatus permission = await location.hasPermission();
+//     if (permission == PermissionStatus.denied) {
+//       permission = await location.requestPermission();
+//       if (permission != PermissionStatus.granted) return;
+//     }
 //   }
 
+//   // ================================
+//   // 2. LIVE USER LOCATION TRACKING
+//   // ================================
+//   void _listenForLiveUserLocation() {
+//     location.onLocationChanged.listen((loc) async {
+//       if (loc.latitude == null || loc.longitude == null) return;
+
+//       final pos = LatLng(loc.latitude!, loc.longitude!);
+
+//       setState(() {
+//         currentUserPosition = pos;
+
+//         // Add/update user marker
+//         _markers.removeWhere((m) => m.markerId.value == "USER");
+//         _markers.add(
+//           Marker(
+//             markerId: const MarkerId("USER"),
+//             position: pos,
+//             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+//             infoWindow: const InfoWindow(title: "You are here"),
+//           ),
+//         );
+//       });
+
+//       // Move camera smoothly
+//       final GoogleMapController controller = await _controller.future;
+//       controller.animateCamera(
+//         CameraUpdate.newLatLng(pos),
+//       );
+//     });
+//   }
+
+//   // ================================
+//   // 3. LIVE INCIDENT MARKERS
+//   // ================================
+//   void _listenForIncidents() {
+//     FirebaseFirestore.instance
+//         .collection('incidents')
+//         .orderBy('createdAt', descending: true)
+//         .limit(100)
+//         .snapshots()
+//         .listen((snapshot) {
+//       Set<Marker> newMarkers = {};
+
+//       for (var doc in snapshot.docs) {
+//         final incident = Incident.fromDoc(doc);
+
+//         newMarkers.add(
+//           Marker(
+//             markerId: MarkerId(doc.id),
+//             position: LatLng(
+//               incident.lat,
+//               incident.lon,
+//             ),
+//             icon: BitmapDescriptor.defaultMarkerWithHue(
+//               incident.verified
+//                   ? BitmapDescriptor.hueGreen
+//                   : BitmapDescriptor.hueRed,
+//             ),
+//             infoWindow: InfoWindow(
+//               title: incident.category,
+//               snippet:
+//                   "${incident.category.toUpperCase()} • ${incident.locationName}",
+//             ),
+//           ),
+//         );
+//       }
+
+//       // Keep user marker
+//       if (currentUserPosition != null) {
+//         newMarkers.add(
+//           Marker(
+//             markerId: const MarkerId("USER"),
+//             position: currentUserPosition!,
+//             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+//           ),
+//         );
+//       }
+
+//       setState(() => _markers = newMarkers);
+//     });
+//   }
+
+//   // ================================
+//   // MAP UI
+//   // ================================
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
-//       appBar: AppBar(title: Text('Incident Map'), leading: BackButton()),
-//       body: Stack(children: [
-//         GoogleMap(
-//           initialCameraPosition: _initial,
-//           markers: _markers.map((m) {
-//             return m.copyWith(onTapParam: () => _onMarkerTap(m.markerId.value));
-//           }).toSet(),
-//           onMapCreated: (c) => _controller = c,
-//           myLocationEnabled: true,
+//       appBar: AppBar(
+//         title: const Text("Live Map"),
+//         backgroundColor: AppColors.bg,
+//       ),
+//       body: GoogleMap(
+//         initialCameraPosition: const CameraPosition(
+//           target: LatLng(9.0820, 8.6753), // Nigeria center
+//           zoom: 14,
 //         ),
-//         Positioned(
-//           right: 16, top: 16,
-//           child: FloatingActionButton(
-//             mini: true,
-//             backgroundColor: AppColors.card,
-//             onPressed: () => _controller?.animateCamera(CameraUpdate.newCameraPosition(_initial)),
-//             child: Icon(Icons.my_location_rounded, color: AppColors.safetyBlue),
-//           ),
-//         ),
-//       ]),
+//         myLocationButtonEnabled: true,
+//         zoomControlsEnabled: false,
+//         markers: _markers,
+//         onMapCreated: (controller) => _controller.complete(controller),
+//       ),
 //     );
 //   }
 // }
-
 
 
 // /lib/pages/map.dart
@@ -73,7 +160,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../constants.dart';
-import '../widgets/incident_card.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -120,7 +206,7 @@ class _MapPageState extends State<MapPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IncidentCard(title: marker.title, subtitle: marker.subtitle),
+            // IncidentCard(title: marker.title, subtitle: marker.subtitle, badge: '',, badgeColor: null,, onTap: () {  },),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/details'),

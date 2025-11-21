@@ -20,8 +20,8 @@ class BottomNav extends StatelessWidget {
       items: [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
-        BottomNavigationBarItem(icon: Icon(Icons.insights_rounded), label: 'Analytics'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.auto_awesome), label: 'My AI'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
       type: BottomNavigationBarType.fixed,
     );

@@ -56,10 +56,10 @@ class _StartupPageState extends State<StartupPage> {
             const SizedBox(height: 60),
 
             // Loading indicator
-            // const CircularProgressIndicator(
-            //   color: Colors.white,
-            //   strokeWidth: 2.5,
-            // ),
+            const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2.5,
+            ),
           ],
         ),
       ),
