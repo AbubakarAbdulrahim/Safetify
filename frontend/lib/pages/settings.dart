@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
+import '../services/theme_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
-
-
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -13,92 +13,120 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _location = true;
   bool _dataSharing = false;
-  final bool _loading = false;
-  String _theme = 'Light';
+  bool _loading = false;
 
-
-
-  Future<void> _save() async {
-    setState(() {});
-    await Future.delayed(Duration(seconds: 1));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Saved successfully'),
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
   }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _location = prefs.getBool('location_services') ?? true;
+      _dataSharing = prefs.getBool('data_sharing') ?? false;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Settings'), leading: BackButton()),
+      appBar: AppBar(title: const Text('Account & Settings'), leading: const BackButton()),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(children: [
-            Align(alignment: Alignment.centerLeft, child: Text('Account', style: TextStyle(fontWeight: FontWeight.w700))),
-            SizedBox(height: 8),
-            _tile('Change Password', onTap: () {}),
-            _tile('Language', onTap: () {}),
-            SizedBox(height: 16),
-            Align(alignment: Alignment.centerLeft, child: Text('Privacy', style: TextStyle(fontWeight: FontWeight.w700))),
-            SizedBox(height: 8),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Align(alignment: Alignment.centerLeft, child: Text('Account', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color))),
+            const SizedBox(height: 8),
+            _tile('Update Profile', onTap: () => Navigator.pushNamed(context, '/account_settings')),
+            _tile('Change Password', onTap: () => Navigator.pushNamed(context, '/change_password')),
+            const SizedBox(height: 16),
+            Align(alignment: Alignment.centerLeft, child: Text('Privacy', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color))),
+            const SizedBox(height: 8),
             SwitchListTile(
-              title: Text('Location Services'),
+              title: const Text('Location Services'),
               value: _location,
               onChanged: (v) => setState(() => _location = v),
-              secondary: Icon(Icons.location_on_rounded, color: AppColors.safetyBlue),
+              secondary: const Icon(Icons.location_on_rounded, color: AppColors.safetyBlue),
+              activeColor: AppColors.safetyBlue,
+              activeTrackColor: AppColors.safetyBlue.withOpacity(0.3),
+              inactiveThumbColor: Colors.grey.shade400,
+              inactiveTrackColor: Colors.grey.shade200,
             ),
             SwitchListTile(
-              title: Text('Data Sharing'),
+              title: const Text('Data Sharing'),
               value: _dataSharing,
               onChanged: (v) => setState(() => _dataSharing = v),
-              secondary: Icon(Icons.storage_rounded, color: AppColors.safetyBlue),
+              secondary: const Icon(Icons.storage_rounded, color: AppColors.safetyBlue),
+              activeColor: AppColors.safetyBlue,
+              activeTrackColor: AppColors.safetyBlue.withOpacity(0.3),
+              inactiveThumbColor: Colors.grey.shade400,
+              inactiveTrackColor: Colors.grey.shade200,
             ),
-            SizedBox(height: 16),
-            Align(alignment: Alignment.centerLeft, child: Text('App', style: TextStyle(fontWeight: FontWeight.w700))),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                SizedBox(width: 2,),
-                Icon(Icons.palette_rounded, color: AppColors.safetyBlue),
-                SizedBox(width: 12),
-                Text('Theme', style: TextStyle(fontWeight: FontWeight.w600)),
-                Spacer(),
-                ChoiceChip(label: Text('Light'), selected: _theme=='Light', onSelected: (s) => setState(() => _theme='Light')),
-                SizedBox(width: 8),
-                ChoiceChip(label: Text('Dark'), selected: _theme=='Dark', onSelected: (s) => setState(() => _theme='Dark')),
-              ],
+            const SizedBox(height: 16),
+            Align(alignment: Alignment.centerLeft, child: Text('App', style: TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color))),
+            const SizedBox(height: 8),
+            ValueListenableBuilder<ThemeMode>(
+              valueListenable: ThemeService().themeMode,
+              builder: (context, themeMode, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.palette_rounded, color: AppColors.safetyBlue),
+                      title: const Text('Theme', style: TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text(_getThemeText(themeMode)),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _themeIcon(Icons.light_mode, ThemeMode.light, themeMode),
+                          const SizedBox(width: 8),
+                          _themeIcon(Icons.dark_mode, ThemeMode.dark, themeMode),
+                          const SizedBox(width: 8),
+                          _themeIcon(Icons.settings_system_daydream, ThemeMode.system, themeMode),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-            Spacer(),
-            const SizedBox(height: 20),
-              _loading
-                ? const Center(child: CircularProgressIndicator())
-                  : SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                    onPressed: _save,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.safetyBlue,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      "Save",
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
-                    ),
-                  ),
-            const SizedBox(height: 20),
-          ]),
+          ],
         ),
       ),
     );
   }
 
+  Widget _themeIcon(IconData icon, ThemeMode mode, ThemeMode currentMode) {
+    final isSelected = mode == currentMode;
+    return IconButton(
+      icon: Icon(icon),
+      color: isSelected ? AppColors.safetyBlue : Colors.grey,
+      onPressed: () => ThemeService().setTheme(mode),
+      tooltip: _getThemeText(mode),
+    );
+  }
+
+  String _getThemeText(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System';
+    }
+  }
+
   Widget _tile(String label, {VoidCallback? onTap}) {
-    return ListTile(title: Text(label), trailing: Icon(Icons.chevron_right_rounded), onTap: onTap);
+    return ListTile(
+      title: Text(label),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: onTap,
+      leading: const Icon(Icons.person, color: Colors.transparent), // Placeholder for alignment if needed
+      minLeadingWidth: 0,
+    );
   }
 }

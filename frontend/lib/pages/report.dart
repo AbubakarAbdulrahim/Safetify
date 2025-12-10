@@ -7,9 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
 import '../constants.dart';
 import '../models/incidents.dart';
+import '../models/alerts.dart';
 import '../services/firestore_service.dart';
 import '../services/cloudinary_service.dart';
-
+import '../services/location_service.dart';
 
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});
@@ -18,30 +19,54 @@ class ReportPage extends StatefulWidget {
   _ReportPageState createState() => _ReportPageState();
 }
 
-class _ReportPageState extends State<ReportPage> {
+class _ReportPageState extends State<ReportPage> with TickerProviderStateMixin {
   final TextEditingController _descController = TextEditingController();
   final FirestoreService _firestore = FirestoreService();
   final ImagePicker _picker = ImagePicker();
+  final PageController _pageController = PageController();
 
+  int _currentStep = 0;
   String _category = 'Insecurity';
   File? _photo;
   double? _lat, _lon;
   String _locationName = "Current Location";
   bool _loading = false;
-
-  final List<Map<String, dynamic>> _categories = [
-    {'label': 'Insecurity', 'icon': Icons.health_and_safety},
-    {'label': 'Fire', 'icon': Icons.local_fire_department_rounded},
-    {'label': 'Traffic', 'icon': Icons.directions_car_rounded},
-    {'label': 'Waste', 'icon': Icons.delete_rounded},
-    {'label': 'Flood', 'icon': Icons.water_rounded},
-    {'label': 'Blockage', 'icon': Icons.block_rounded},
-    {'label': 'Other', 'icon': Icons.report_problem_rounded},
-  ];
-  
   bool _isLocating = false;
 
-  //pick photo
+  late AnimationController _successController;
+  late Animation<double> _scaleAnimation;
+
+  final List<Map<String, dynamic>> _categories = [
+    {'label': 'Insecurity', 'icon': Icons.health_and_safety, 'color': Colors.red},
+    {'label': 'Ambulance Needed', 'icon': Icons.medical_services_rounded, 'color': Colors.green},
+    {'label': 'Road Blockage', 'icon': Icons.warning, 'color': Colors.purple},
+    {'label': 'Fire Outbreak', 'icon': Icons.local_fire_department_rounded, 'color': Colors.deepOrange},
+    {'label': 'Traffic Congestion', 'icon': Icons.directions_car_rounded, 'color': Colors.blue},
+    {'label': 'Waste Dumps', 'icon': Icons.delete_rounded, 'color': Colors.brown},
+    {'label': 'Flood', 'icon': Icons.water_rounded, 'color': Colors.lightBlue},
+    {'label': 'Accident', 'icon': Icons.car_crash, 'color': Colors.orange},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _successController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _successController, curve: Curves.elasticOut),
+    );
+    _getLocationName(); // Auto-detect location on load
+  }
+
+  @override
+  void dispose() {
+    _descController.dispose();
+    _pageController.dispose();
+    _successController.dispose();
+    super.dispose();
+  }
 
   Future<void> _takePhoto() async {
     try {
@@ -58,12 +83,8 @@ class _ReportPageState extends State<ReportPage> {
     }
   }
 
-  //detect location
-
   Future<void> _getLocationName() async {
-    setState(() {
-      _isLocating = true;
-    });
+    setState(() => _isLocating = true);
 
     try {
       Location location = Location();
@@ -83,13 +104,16 @@ class _ReportPageState extends State<ReportPage> {
           _lat = loc.latitude;
           _lon = loc.longitude;
           _locationName = locName;
+          _isLocating = false;
         });
       } else {
+        setState(() => _isLocating = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Location permission denied")),
         );
       }
     } catch (e) {
+      setState(() => _isLocating = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Unable to get location")),
       );
@@ -97,21 +121,8 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   Future<String> _getLocationNameFromCoordinates(double lat, double lon) async {
-    try {
-      final placemarks = await placemarkFromCoordinates(lat, lon);
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
-        return '${place.street ?? ''}, ${place.locality ?? ''}, ${place.administrativeArea ?? ''}'
-            .replaceAll(RegExp(r',\s*(?=,)'), '')
-            .trim();
-      }
-    } catch (e) {
-      print('Error fetching location name: $e');
-    }
-    return 'Unknown location';
+    return await LocationService().getAddressFromCoordinates(lat, lon);
   }
-
-  //submit report handler
 
   Future<void> _submit() async {
     if (_loading) return;
@@ -132,14 +143,6 @@ class _ReportPageState extends State<ReportPage> {
         photoUrl = await CloudinaryService.uploadIncidentImage(_photo!);
       }
 
-
-      // String photoUrl = await _storage.uploadIncidentImage(
-      //   "incidents/${DateTime.now().millisecondsSinceEpoch}.jpg",
-      //   _photo!,
-      // );
-
-      
-
       // Get geo-location name
       String locationName = await _getLocationNameFromCoordinates(_lat!, _lon!);
 
@@ -153,269 +156,628 @@ class _ReportPageState extends State<ReportPage> {
         locationName: locationName,
         photoUrl: photoUrl ?? '',
         userId: FirebaseAuth.instance.currentUser!.uid,
+        verified: false,
         createdAt: DateTime.now(),
       );
 
-      // save incident
-      await _firestore.createIncident(incident);
+      // Save to Firestore
+      final docRef = await _firestore.saveIncident(incident);
+
+      // Create alert for nearby users
+      final alert = Alert(
+        id: '',
+        incidentId: docRef.id,
+        category: _category,
+        description: _descController.text.trim(),
+        locationName: locationName,
+        photoUrl: photoUrl,
+        lat: _lat!,
+        lon: _lon!,
+        sentAt: DateTime.now(),
+      );
+      await _firestore.saveAlert(alert);
 
       setState(() => _loading = false);
 
-      await showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Row(
-            children: const [
-              Icon(Icons.check_circle, color: AppColors.successGreen),
-              SizedBox(width: 8),
-              Text("Reported Successfully"),
-            ],
-          ),
-          content: const Text(
-            "Your report has been sent to nearby users and authorities.",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Done"),
-            ),
-          ],
-        ),
-      );
-
-      Navigator.pop(context);
-
+      // Show success animation
+      _showSuccessDialog();
     } catch (e) {
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to submit report: $e")),
+        SnackBar(content: Text("Error: $e"), backgroundColor: AppColors.alertRed),
       );
     }
   }
 
-  @override
-  void dispose() {
-    _descController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: const Text("Report Incident"),
-        leading: const BackButton(),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+  void _showSuccessDialog() {
+    _successController.forward();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ScaleTransition(
+        scale: _scaleAnimation,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-
-              // category selecttor
-
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _categories.map((c) {
-                    final label = c['label'] as String;
-                    final icon = c['icon'] as IconData;
-                    final selected = label == _category;
-
-                    return GestureDetector(
-                      onTap: () => setState(() => _category = label),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.safetyBlue.withOpacity(0.1)
-                              : AppColors.card,
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.successGreen.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: AppColors.successGreen,
+                  size: 60,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Report Submitted!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Your incident report has been submitted successfully. Nearby users will be notified.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/history');
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.safetyBlue),
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          border: selected
-                              ? Border.all(color: AppColors.safetyBlue.withOpacity(0.18))
-                              : null,
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(icon, color: selected ? AppColors.safetyBlue : Colors.grey[700]),
-                            const SizedBox(height: 6),
-                            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                          ],
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // photo picker
-              GestureDetector(
-                onTap: _takePhoto,
-                child: _photo == null
-                    ? const DottedAddPhoto()
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          _photo!,
-                          height: 190,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // location detector
-              // ListTile(
-              //   contentPadding: EdgeInsets.zero,
-              //   leading: Icon(Icons.location_on_rounded, color: AppColors.safetyBlue),
-              //   title: Text(
-              //     _locationName,
-              //     style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
-              //   ),
-              //   subtitle: Text(
-              //     _lat == null ? "Tap the icon to get your location" : "Auto-detected",
-              //     style: GoogleFonts.inter(fontSize: 14),
-              //   ),
-              //   trailing: ElevatedButton(
-              //     onPressed: _getLocationName,
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: AppColors.safetyBlue,
-              //       padding: const EdgeInsets.all(10),
-              //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              //     ),
-              //     child: const Icon(Icons.my_location_rounded, size: 22, color: Colors.white),
-              //   ),
-              // ),
-              ListTile(
-  contentPadding: EdgeInsets.zero,
-  leading: Icon(Icons.location_on_sharp, color: AppColors.safetyBlue),
-  title: Text(
-    _locationName,
-    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500),
-  ),
-  subtitle: Text(
-    _lat == null ? "Tap to get your current location" : "Auto-detected",
-    style: GoogleFonts.inter(fontSize: 14),
-  ),
-  trailing: ElevatedButton(
-    // 1. If locating, disable the button (null) so they can't spam click
-    onPressed: _isLocating 
-        ? null 
-        : () async {
-            // Start Loader
-            setState(() {
-              _isLocating = true;
-            });
-
-            // Wait for your existing function to finish
-            await _getLocationName();
-
-            // Stop Loader
-            setState(() {
-              _isLocating = false;
-            });
-          },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: AppColors.safetyBlue,
-      // Ensure button looks active even when disabled (optional preference)
-      disabledBackgroundColor: AppColors.safetyBlue.withOpacity(0.8),
-      padding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    ),
-    // 2. Swap the Icon with a Spinner based on state
-    child: _isLocating
-        ? const SizedBox(
-            height: 22,
-            width: 22,
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2.5, // Keep it thin to look elegant
-            ),
-          )
-        : const Icon(Icons.my_location_rounded, size: 22, color: Colors.white),
-  ),
-),
-
-              const SizedBox(height: 12),
-
-              TextField(
-                controller: _descController,
-                minLines: 3,
-                maxLines: 6,
-                decoration: const InputDecoration(
-                  hintText: "Describe the incident (optional)",
-                ),
-                style: GoogleFonts.inter(fontSize: 16),
-              ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.safetyBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    disabledBackgroundColor: AppColors.safetyBlue.withOpacity(0.8),
+                      child: const Text('View Report'),
+                    ),
                   ),
-                  child: _loading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Text(
-                          "Submit Report",
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.safetyBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                ),
+                      ),
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-// add photo widget
+  void _nextStep() {
+    if (_currentStep < 2) {
+      setState(() => _currentStep++);
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
-class DottedAddPhoto extends StatelessWidget {
-  const DottedAddPhoto({super.key});
+  void _previousStep() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 170,
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: const Text("Report Incident"),
+        leading: const BackButton(),
+        elevation: 0,
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.camera_alt_rounded, size: 36, color: Colors.grey[500]),
-            const SizedBox(height: 8),
-            Text(
-              "Add Photo\n(optional)",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.w600),
+      body: Column(
+        children: [
+          // Step Progress Indicator
+          _buildStepIndicator(),
+          
+          // Page Content
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              onPageChanged: (index) => setState(() => _currentStep = index),
+              children: [
+                _buildCategoryStep(),
+                _buildDetailsStep(),
+                _buildPhotoLocationStep(),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // Navigation Buttons
+          _buildNavigationButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildStepItem(0, 'Category', Icons.category),
+          _buildStepConnector(0),
+          _buildStepItem(1, 'Details', Icons.description),
+          _buildStepConnector(1),
+          _buildStepItem(2, 'Photo & Location', Icons.photo_camera),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepItem(int step, String label, IconData icon) {
+    final isActive = _currentStep == step;
+    final isCompleted = _currentStep > step;
+
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isCompleted || isActive
+                  ? AppColors.safetyBlue
+                  : Theme.of(context).dividerColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isCompleted ? Icons.check : icon,
+              color: isCompleted || isActive ? Colors.white : Colors.grey,
+              size: 20,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              color: isActive
+                  ? AppColors.safetyBlue
+                  : Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepConnector(int step) {
+    final isCompleted = _currentStep > step;
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.only(bottom: 20),
+        color: isCompleted
+            ? AppColors.safetyBlue
+            : Theme.of(context).dividerColor,
+      ),
+    );
+  }
+
+  Widget _buildCategoryStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select Incident Category',
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Choose the category that best describes the incident',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+          ),
+          const SizedBox(height: 24),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.2,
+            ),
+            itemCount: _categories.length,
+            itemBuilder: (context, index) {
+              final category = _categories[index];
+              final label = category['label'] as String;
+              final icon = category['icon'] as IconData;
+              final color = category['color'] as Color;
+              final isSelected = label == _category;
+
+              return GestureDetector(
+                onTap: () => setState(() => _category = label),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? color.withOpacity(0.1)
+                        : Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected ? color : Theme.of(context).dividerColor,
+                      width: isSelected ? 2 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        icon,
+                        size: 40,
+                        color: isSelected ? color : Colors.grey,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected
+                              ? color
+                              : Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Incident Details',
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Provide a clear description of what happened',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _descController,
+            maxLines: 8,
+            maxLength: 500,
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+            decoration: InputDecoration(
+              hintText: 'Describe the incident in detail...',
+              hintStyle: TextStyle(color: Theme.of(context).hintColor),
+              filled: true,
+              fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.safetyBlue, width: 2),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoLocationStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Photo & Location',
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add a photo and confirm your location',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Photo Section
+          Text(
+            'Photo (Optional)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _takePhoto,
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor,
+                  style: BorderStyle.solid,
+                  width: 2,
+                ),
+              ),
+              child: _photo == null
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_a_photo,
+                          size: 48,
+                          color: AppColors.safetyBlue,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Tap to take a photo',
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(
+                            _photo!,
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: IconButton(
+                            icon: const Icon(Icons.close, color: Colors.white),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.black54,
+                            ),
+                            onPressed: () => setState(() => _photo = null),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Location Section
+          Text(
+            'Location',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Theme.of(context).dividerColor),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: AppColors.safetyBlue,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _isLocating ? 'Detecting location...' : _locationName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      if (_lat != null && _lon != null)
+                        Text(
+                          '${_lat!.toStringAsFixed(4)}, ${_lon!.toStringAsFixed(4)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (_isLocating)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _getLocationName,
+                    color: AppColors.safetyBlue,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          if (_currentStep > 0)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _previousStep,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: AppColors.safetyBlue),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Back'),
+              ),
+            ),
+          if (_currentStep > 0) const SizedBox(width: 12),
+          Expanded(
+            flex: _currentStep == 0 ? 1 : 1,
+            child: ElevatedButton(
+              onPressed: _currentStep == 2 ? _submit : _nextStep,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: AppColors.safetyBlue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _loading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      _currentStep == 2 ? 'Submit Report' : 'Next',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

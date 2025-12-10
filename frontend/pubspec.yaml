@@ -14,6 +14,7 @@ dependencies:
     sdk: flutter
   url_launcher: ^6.3.0
   share_plus: ^12.0.1
+  flutter_phone_direct_caller: ^2.1.1
 
   google_fonts: ^6.3.2
   google_maps_flutter: ^2.2.0
@@ -38,25 +39,25 @@ dependencies:
   firebase_core: ^4.2.1
   firebase_auth: ^6.1.2
   firebase_messaging: ^16.0.4
-  # flutter_local_notifications: ^16.3.0
+  flutter_local_notifications: ^18.0.1
   firebase_storage: ^13.0.4
   timeago: ^3.7.1
+  fl_chart: ^0.69.0
+  flutter_slidable: ^3.0.0
+  intl: ^0.19.0
 
   # cloudinary
   cloudinary_api: ^1.1.1
   cloudinary_url_gen: ^1.8.0
   cloudinary_flutter: ^1.1.0
+  google_generative_ai: ^0.4.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^6.0.0
-
-
-
-
-
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -70,19 +71,11 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/fire.jpg
-    - assets/images/thugs.jpg
-    - assets/images/flood.jpg
-    - assets/images/traffic.jpg
-    - assets/images/profile.jpg
-    - assets/images/5.png
-    - assets/images/6.png
-    - assets/images/7.png
-    - assets/images/8.png
-    - assets/images/9.png
+    - assets/images/profile.png
     - assets/images/placeholder.jpg
+    - assets/images/usable.png
+    - assets/images/mypic.jpg
 
-  #   - assets/images/incident_placeholder.jpg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
@@ -108,3 +101,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21

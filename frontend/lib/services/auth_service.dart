@@ -52,6 +52,18 @@ class AuthService {
         password: password,
       );
 
+
+      // ban user check
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(cred.user!.uid).get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data() as Map<String, dynamic>?;
+        if (data != null && data['isBanned'] == true) {
+          await FirebaseAuth.instance.signOut();
+          throw Exception("Your account has been banned.");
+        }
+      }
+
       // Refresh FCM token
       final token = await _fcm.getToken();
 
@@ -64,6 +76,7 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       throw Exception(_handleAuthError(e.code));
     }
+    
   }
 
   // logout

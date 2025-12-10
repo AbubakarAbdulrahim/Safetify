@@ -10,7 +10,11 @@ class Incident {
   final String photoUrl;
   final String userId;
   final bool verified;
+  final bool resolved;
   final DateTime createdAt;
+  final int upvotes;
+  final int downvotes;
+  final Map<String, dynamic> userVotes;
 
   Incident({
     required this.id,
@@ -22,12 +26,15 @@ class Incident {
     required this.photoUrl,
     required this.userId,
     this.verified = false,
+    this.resolved = false,
     required this.createdAt,
+    this.upvotes = 0,
+    this.downvotes = 0,
+    this.userVotes = const {},
   });
 
   Map<String, dynamic> toMap() {
     return {
-      "id": id,
       "category": category,
       "description": description,
       "lat": lat,
@@ -36,13 +43,17 @@ class Incident {
       "photoUrl": photoUrl,
       "userId": userId,
       "verified": verified,
-      "createdAt": createdAt.toIso8601String(),
+      "resolved": resolved,
+      "createdAt": Timestamp.fromDate(createdAt),
+      "upvotes": upvotes,
+      "downvotes": downvotes,
+      "userVotes": userVotes,
     };
   }
 
   factory Incident.fromDoc(
-      QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data();
+      DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? {};
 
     return Incident(
       id: doc.id,
@@ -54,8 +65,20 @@ class Incident {
       photoUrl: data["photoUrl"] ?? "",
       userId: data["userId"] ?? "",
       verified: data["verified"] ?? false,
-      createdAt: DateTime.tryParse(data["createdAt"] ?? "") ??
-          DateTime.now(),
+      resolved: data["resolved"] ?? false,
+      createdAt: _parseDateTime(data["createdAt"]),
+      upvotes: data["upvotes"] ?? 0,
+      downvotes: data["downvotes"] ?? 0,
+      userVotes: data["userVotes"] ?? {},
     );
   }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
+
+  void operator [](String other) {}
 }

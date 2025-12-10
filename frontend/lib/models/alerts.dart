@@ -5,6 +5,7 @@ class Alert {
   final String incidentId;
   final String category;
   final String locationName;
+  final String? photoUrl;
   final double lat;
   final double lon;
   final String description;
@@ -15,6 +16,7 @@ class Alert {
     required this.incidentId,
     required this.category,
     required this.locationName,
+    required this.photoUrl,
     required this.lat,
     required this.lon,
     required this.description,
@@ -28,6 +30,7 @@ class Alert {
       incidentId: data["incidentId"],
       category: data["category"],
       locationName: data["locationName"],
+      photoUrl: data["photoUrl"],
       lat: (data["lat"] as num).toDouble(),
       lon: (data["lon"] as num).toDouble(),
       description: data["description"],
@@ -47,6 +50,7 @@ class Alert {
       "incidentId": incidentId,
       "category": category,
       "locationName": locationName,
+      "photoUrl": photoUrl,
       "lat": lat,
       "lon": lon,
       "description": description,
