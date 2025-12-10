@@ -223,7 +223,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${liveIncident.category} Incident',
+                              '${liveIncident.category}',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -581,54 +581,34 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   IconData _getCategoryIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'fire':
-        return Icons.local_fire_department;
-      case 'theft':
-      case 'insecurity':
-        return Icons.security;
-      case 'accident':
-        return Icons.car_crash;
-      case 'flood':
-        return Icons.water_damage;
-      case 'traffic':
-        return Icons.traffic;
-      case 'medical':
-        return Icons.medical_services;
-      case 'blockage':
-        return Icons.block;
-      case 'waste':
-        return Icons.delete_outline;
-      case 'other':
-        return Icons.info_outline;
-      default:
-        return Icons.warning_amber_rounded;
-    }
+    final cat = category.toLowerCase();
+    if (cat.contains('insecurity')) return Icons.security;
+    if (cat.contains('theft')) return Icons.security;
+    if (cat.contains('fire')) return Icons.local_fire_department;
+    if (cat.contains('traffic')) return Icons.traffic;
+    if (cat.contains('waste')) return Icons.delete_outline;
+    if (cat.contains('flood')) return Icons.water_damage;
+    if (cat.contains('blockage')) return Icons.block;
+    if (cat.contains('accident')) return Icons.car_crash;
+    if (cat.contains('medical')) return Icons.medical_services;
+    if (cat.contains('other')) return Icons.info_outline;
+    
+    return Icons.warning_amber_rounded;
   }
 
   Color _getCategoryColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'fire':
-        return AppColors.alertRed;
-      case 'theft':
-      case 'insecurity':
-        return Colors.deepOrange;
-      case 'accident':
-        return Colors.orange;
-      case 'flood':
-        return Colors.blue;
-      case 'traffic':
-        return AppColors.safetyBlue;
-      case 'blockage':
-        return Colors.purple;
-      case 'medical':
-        return Colors.teal;
-      case 'waste':
-        return Colors.brown;
-      case 'other':
-        return Colors.grey;
-      default:
-        return Colors.red;
-    }
+    final cat = category.toLowerCase();
+    if (cat.contains('insecurity')) return Colors.deepOrange;
+    if (cat.contains('theft')) return Colors.deepOrange;
+    if (cat.contains('fire')) return AppColors.alertRed;
+    if (cat.contains('traffic')) return AppColors.safetyBlue;
+    if (cat.contains('waste')) return Colors.brown;
+    if (cat.contains('flood')) return Colors.blue;
+    if (cat.contains('blockage')) return Colors.purple;
+    if (cat.contains('accident')) return Colors.orange;
+    if (cat.contains('medical')) return Colors.teal;
+    if (cat.contains('other')) return Colors.black54; // Better contrast for 'other'
+
+    return Colors.red;
   }
 }
