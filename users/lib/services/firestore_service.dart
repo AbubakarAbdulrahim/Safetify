@@ -11,13 +11,12 @@ import 'package:safetify/models/users.dart' as model;
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // incidents
-  // CREATE INCIDENT
+  // create incidents
   Future<void> createIncident(Incident incident) async {
     await _db.collection("incidents").add(incident.toMap());
   }
 
-  // SAVE INCIDENT
+  // save incidents
   Future<DocumentReference> saveIncident(Incident incident) async {
     return await _db.collection("incidents").add(incident.toMap());
   }
@@ -29,7 +28,7 @@ class FirestoreService {
     });
   }
 
-  // GET ALL INCIDENTS
+  // get all incidents
   Stream<List<Incident>> getAllIncidents({int limit = 10}) {
     return _db
         .collection("incidents")
@@ -40,7 +39,7 @@ class FirestoreService {
             snap.docs.map((doc) => Incident.fromDoc(doc)).toList());
   }
 
-  // GET USER INCIDENTS
+  // get user incidents
   Stream<List<Incident>> getUserIncidents(String uid) {
     return _db
         .collection('incidents')
@@ -52,7 +51,7 @@ class FirestoreService {
             .toList());
   }
 
-  // GET ALL INCIDENTS FOR ANALYTICS
+  // get all incidents for analytics
   Stream<List<Incident>> getAnalyticsIncidents() {
     return _db
         .collection("incidents")
@@ -64,16 +63,17 @@ class FirestoreService {
   }
 
 // users
-// Wrapper to get the currently logged-in user's profile
+
+// get the currently logged-in user's profile
 Future<model.User?> getCurrentUserProfile() async {
   final user = FirebaseAuth.instance.currentUser;
   if (user != null) {
-    // Calls your existing method nicely
+
     return await getUser(user.uid);
   }
   return null;
 }
-//users original
+// get users
   Future<model.User> getUser(String uid) async {
     final snapshot = await _db
         .collection('users')
@@ -109,6 +109,7 @@ Future<model.User?> getCurrentUserProfile() async {
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
+
   // alerts
 
   Stream<List<Alert>> getUserAlerts(String uid) {
@@ -131,7 +132,7 @@ Future<model.User?> getCurrentUserProfile() async {
     await _db.collection('alerts').add(alert.toMap());
   }
 
-  // Community Updates
+  // Community Updates alerts
   Stream<List<Map<String, dynamic>>> getCommunityUpdates() {
     return _db
         .collection('community_updates')
@@ -145,7 +146,7 @@ Future<model.User?> getCurrentUserProfile() async {
             }).toList());
   }
 
-  // near by detector (3 KM)
+  // near by detector (5 KM)
 
   Future<List<model.User>> _getNearbyUsers(double alertLat, double alertLng) async {
     final snapshot = await _db.collection('users').get();
@@ -164,14 +165,15 @@ Future<model.User?> getCurrentUserProfile() async {
         user.lon!,
       );
 
-      if (distance <= 3.0) {
+      if (distance <= 5.0) {
         nearbyUsers.add(user);
       }
     }
 
     return nearbyUsers;
   }
-  // send push notification
+
+  // send push notification to nearby
 
   Future<void> sendAlertsToNearbyUsers(Alert alert) async {
     final users = await _getNearbyUsers(alert.lat, alert.lon);
@@ -189,18 +191,18 @@ Future<model.User?> getCurrentUserProfile() async {
 
   
 
-  // PUSH NOTIFICATION
+  // push notifications
+
   Future<void> _sendPushNotification({
     required String token,
     required String title,
     required String body,
   }) async {
-    // Placeholder: do not attempt to call client SDK methods for server push.
-    // Implement a server-side solution for production.
+
     await Future<void>.value();
   }
 
-  // 3 km distance calculation
+  // 5 km distance calculation
   double _calculateDistance(
       double lat1, double lon1, double lat2, double lon2) {
     const earthRadius = 6371; // KM
@@ -226,7 +228,7 @@ Future<model.User?> getCurrentUserProfile() async {
     });
   }
 
-  // Vote on incident
+  // Reaction on incident
   Future<void> voteIncident(String incidentId, String userId, String voteType) async {
     final docRef = _db.collection('incidents').doc(incidentId);
 
@@ -244,11 +246,13 @@ Future<model.User?> getCurrentUserProfile() async {
       final currentVote = userVotes[userId];
 
       if (currentVote == voteType) {
+
         // Remove vote if clicking same type
         userVotes.remove(userId);
         if (voteType == 'up') upvotes--;
         if (voteType == 'down') downvotes--;
       } else {
+
         // Change vote or add new vote
         if (currentVote == 'up') upvotes--;
         if (currentVote == 'down') downvotes--;
@@ -266,7 +270,7 @@ Future<model.User?> getCurrentUserProfile() async {
     });
   }
 
-  // PERSONAL EMERGENCY CONTACTS
+  // personal emergency contact
 
   Future<void> addEmergencyContact(String name, String phone) async {
     final user = FirebaseAuth.instance.currentUser;

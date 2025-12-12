@@ -74,7 +74,7 @@ class _SafetifyAppState extends State<SafetifyApp> {
           themeMode: themeMode,
           debugShowCheckedModeBanner: false,
           navigatorKey: NotificationService.navigatorKey, // Set global navigator key
-          initialRoute: '/',
+          initialRoute: '/', //startup byd default
           routes: {
             '/': (_) => StartupPage(),
             '/home': (_) => HomePage(),

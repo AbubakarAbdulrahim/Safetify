@@ -43,7 +43,7 @@ class HelpSupportPage extends StatelessWidget {
             title: const Text('Email Support'),
             subtitle: const Text('safetifyapps@gmail.com'),
             onTap: () {
-              // Implement email launch
+              // to Implement email launch later
             },
           ),
           ListTile(
@@ -51,7 +51,7 @@ class HelpSupportPage extends StatelessWidget {
             title: const Text('Call Emergency Hotline'),
             subtitle: const Text('112'),
             onTap: () {
-              // Implement call launch
+              // later
             },
           ),
         ],

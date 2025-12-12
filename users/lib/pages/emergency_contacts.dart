@@ -157,7 +157,8 @@ class _EmergencyContactsPageState extends State<EmergencyContactsPage> with Sing
               if (nameController.text.isNotEmpty && phoneController.text.isNotEmpty) {
                 _addContact(nameController.text.trim(), phoneController.text.trim());
                 Navigator.pop(context);
-                // Switch to Personal Contacts tab to show the new contact
+
+                // Switch to Personal Contacts tab
                 _tabController.animateTo(1);
               }
             },
@@ -240,7 +241,8 @@ class _EmergencyContactsPageState extends State<EmergencyContactsPage> with Sing
             const SizedBox(height: 8),
             const Text("Add family or friends for quick access"),
             const SizedBox(height: 24),
-            // Location Share Button (even if no contacts, useful to have)
+
+            // My Location Share Button
             _buildShareLocationButton(),
           ],
         ),
@@ -277,19 +279,8 @@ class _EmergencyContactsPageState extends State<EmergencyContactsPage> with Sing
             final position = await _locationService.getCurrentLocation();
             if (position != null) {
                 final link = _locationService.getGoogleMapsLink(position.latitude, position.longitude);
-                // Using share_plus would be better, but for now using UrlLauncherService sms fallback
-                // or we can just copy to clipboard / open share sheet if we had share_plus.
-                // Let's assume we can use share_plus since it's in pubspec (implied by alert_card usage)
-                // I will add the import in a separate step if needed, or use full qualification if possible? 
-                // No, I'll just use a dynamic import approach or assume it's there.
-                // Wait, I can't assume. I'll use UrlLauncherService.sendSms for now as a safe bet 
-                // or just print to console if I can't verify.
-                // actually, let's use the existing UrlLauncherService.sendSms
-                // But that only sends to one person.
-                // Let's try to open a generic share sheet using 'share_plus' package.
-                // I will add 'import 'package:share_plus/share_plus.dart';' to the top of this file in this replacement.
-                
-                // For this specific block, I'll use a placeholder that I'll fix with the import.
+
+                // share plus 
                  _shareLocationWithSharePlus(link);
             }
         },

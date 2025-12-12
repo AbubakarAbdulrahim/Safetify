@@ -57,15 +57,13 @@ class _MapPageState extends State<MapPage> {
         throw 'Location permissions are permanently denied';
       }
 
-      // When we reach here, permissions are granted and we can
-      // continue accessing the position of the device.
+      // position of the device.
       final position = await Geolocator.getCurrentPosition(
         timeLimit: const Duration(seconds: 10),
       );
       
       _mapController.move(LatLng(position.latitude, position.longitude), 15.0);
     } catch (e) {
-      // Silently fail or log if needed
       debugPrint(e.toString());
     } finally {
       if (mounted) {

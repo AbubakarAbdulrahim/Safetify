@@ -125,7 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title: Text(label),
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: onTap,
-      leading: const Icon(Icons.person, color: Colors.transparent), // Placeholder for alignment if needed
+      leading: const Icon(Icons.person, color: Colors.transparent),
       minLeadingWidth: 0,
     );
   }

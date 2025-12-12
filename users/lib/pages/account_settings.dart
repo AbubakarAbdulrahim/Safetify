@@ -70,7 +70,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     try {
       String? imageUrl = _currentImageUrl;
 
-      // Upload new image if selected
+      // Upload new DP
       if (_imageFile != null) {
         imageUrl = await CloudinaryService.uploadIncidentImage(_imageFile!);
         if (imageUrl == null) {
@@ -89,7 +89,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully!')),
       );
-      Navigator.pop(context, true); // Return true to indicate update
+      Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Update failed: $e')),
@@ -117,6 +117,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    
                     // Profile Image
                     Center(
                       child: Stack(

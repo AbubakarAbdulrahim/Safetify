@@ -305,7 +305,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final total = incidents.length;
     final verified = incidents.where((i) => i.verified).length;
     final resolved = incidents.where((i) => i.resolved).length;
-    // final avgResponseTime = "2.5h"; // Placeholder removed
     final resolutionRate = total > 0 ? ((resolved / total) * 100).toStringAsFixed(1) : "0";
 
     return Column(

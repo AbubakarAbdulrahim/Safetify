@@ -209,6 +209,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                     const SizedBox(height: 40),
 
                     if (!_emailSent) ...[
+
                       // Form Card
                       AnimatedBuilder(
                         animation: _shakeAnimation,
@@ -233,6 +234,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                           ),
                           child: Column(
                             children: [
+
                               // Email Field
                               TextField(
                                 controller: emailCtrl,
@@ -314,6 +316,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                         ),
                       ),
                     ] else ...[
+                      
                       // Success Card
                       ScaleTransition(
                         scale: _successAnimation,

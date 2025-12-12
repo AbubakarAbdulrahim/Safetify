@@ -18,7 +18,8 @@ class AboutPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            // App Logo/Icon
+
+            // App Logo
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -32,6 +33,7 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+
             // App Name
             Text(
               'Safetify',
@@ -42,6 +44,7 @@ class AboutPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            
             // Version
             Text(
               'Version 1.0.0',

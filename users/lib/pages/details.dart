@@ -607,7 +607,7 @@ class _DetailsPageState extends State<DetailsPage> {
     if (cat.contains('blockage')) return Colors.purple;
     if (cat.contains('accident')) return Colors.orange;
     if (cat.contains('medical')) return Colors.teal;
-    if (cat.contains('other')) return Colors.black54; // Better contrast for 'other'
+    if (cat.contains('other')) return Colors.black54;
 
     return Colors.red;
   }

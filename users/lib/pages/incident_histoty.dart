@@ -122,6 +122,7 @@ class _IncidentsHistoryPageState extends State<IncidentsHistoryPage> with Single
       ),
       body: Column(
         children: [
+
           // Filter Section
           _buildFilterSection(),
           
@@ -156,6 +157,7 @@ class _IncidentsHistoryPageState extends State<IncidentsHistoryPage> with Single
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           // Category Filter
           Row(
             children: [
@@ -208,6 +210,7 @@ class _IncidentsHistoryPageState extends State<IncidentsHistoryPage> with Single
           // Status and Sort Row
           Row(
             children: [
+              
               // Status Filter
               Expanded(
                 child: Row(

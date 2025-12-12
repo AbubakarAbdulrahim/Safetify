@@ -4,6 +4,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:safetify/models/incidents.dart';
 
+//incident service for cloudinary
+
 class IncidentService {
   final storage = FirebaseStorage.instance;
   final firestore = FirebaseFirestore.instance;

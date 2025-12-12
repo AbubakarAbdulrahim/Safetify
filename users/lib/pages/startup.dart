@@ -116,7 +116,7 @@ class _StartupPageState extends State<StartupPage> with TickerProviderStateMixin
   }
 
   void _navigateAfterDelay() {
-    Timer(const Duration(seconds: 3), () async {
+    Timer(const Duration(seconds: 5), () async {
       if (!mounted) return;
       
       // Wait for Firebase initialization to complete
