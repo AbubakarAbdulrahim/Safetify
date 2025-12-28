@@ -26,6 +26,7 @@ class AuthService {
       final token = await _fcm.getToken();
 
       await _db.collection('users').doc(uid).set({
+        'userId': uid,
         'name': fullName,
         'email': email,
         'phoneNumber': phoneNumber,
@@ -68,6 +69,7 @@ class AuthService {
       final token = await _fcm.getToken();
 
       await _db.collection('users').doc(cred.user!.uid).update({
+        'userId': cred.user!.uid,
         'fcmToken': token,
         'updatedAt': FieldValue.serverTimestamp(),
       });

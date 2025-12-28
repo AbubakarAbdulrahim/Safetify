@@ -147,11 +147,11 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
         passCtrl.text,
       );
 
-      //WELCOME EMAIL
-      await sendWelcomeEmail(
-        nameCtrl.text.trim(),
-        emailCtrl.text.trim(),
-      );
+      // //WELCOME EMAIL
+      // await sendWelcomeEmail(
+      //   nameCtrl.text.trim(),
+      //   emailCtrl.text.trim(),
+      // );
 
       if (!mounted) return;
 
@@ -224,30 +224,30 @@ class _RegisterPageState extends State<RegisterPage> with TickerProviderStateMix
     }
   }
 
-  Future<void> sendWelcomeEmail(String name, String email) async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
+//   Future<void> sendWelcomeEmail(String name, String email) async {
+//   final user = FirebaseAuth.instance.currentUser;
+//   if (user == null) return;
 
-  final idToken = await user.getIdToken();
+//   final idToken = await user.getIdToken();
 
-  final url = Uri.parse("https://safetify-backend.onrender.com/email/welcome");
+//   final url = Uri.parse("https://safetify-backend.onrender.com/email/welcome");
 
-  final body = jsonEncode({
-    "email": email,
-    "name": name,
-  });
+//   final body = jsonEncode({
+//     "email": email,
+//     "name": name,
+//   });
 
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $idToken",
-    },
-    body: body,
-  );
+//   final response = await http.post(
+//     url,
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Authorization": "Bearer $idToken",
+//     },
+//     body: body,
+//   );
 
-  print("Welcome email response: ${response.body}");
-}
+//   print("Welcome email response: ${response.body}");
+// }
 
 
   @override
